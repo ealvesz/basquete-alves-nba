@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Basquete Alves</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+  <img class="main-logo" src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Basketball.png">
+  <h1>Basquete Alves</h1>
+  <p>Campeonato NBA – Simulação</p>
+</header>
+
+<main>
+
+<section id="select-screen">
+  <h2>Escolha seu time</h2>
+  <div class="logos">
+    <div class="team-box" onclick="chooseTeam()"><img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Los_Angeles_Lakers_logo.svg"><span>Lakers</span></div>
+    <div class="team-box" onclick="chooseTeam()"><img src="https://upload.wikimedia.org/wikipedia/en/0/01/Golden_State_Warriors_logo.svg"><span>Warriors</span></div>
+    <div class="team-box" onclick="chooseTeam()"><img src="https://upload.wikimedia.org/wikipedia/en/6/67/Chicago_Bulls_logo.svg"><span>Bulls</span></div>
+    <div class="team-box" onclick="chooseTeam()"><img src="https://upload.wikimedia.org/wikipedia/en/8/8f/Boston_Celtics.svg"><span>Celtics</span></div>
+    <div class="team-box" onclick="chooseTeam()"><img src="https://upload.wikimedia.org/wikipedia/en/9/97/Dallas_Mavericks_logo.svg"><span>Mavericks</span></div>
+    <div class="team-box" onclick="chooseTeam()"><img src="https://upload.wikimedia.org/wikipedia/en/5/5d/Oklahoma_City_Thunder.svg"><span>Thunder</span></div>
+  </div>
+</section>
+
+<section id="game-screen" class="hidden">
+
+<h2 id="match-title"></h2>
+
+<div class="logos">
+  <div class="team-box">
+    <img id="logoA">
+    <span id="teamA-name"></span>
+  </div>
+
+  <div class="score-box" id="placar">0 x 0</div>
+
+  <div class="team-box">
+    <img id="logoB">
+    <span id="teamB-name"></span>
+  </div>
+</div>
+
+<div class="info">
+  <span>Quarto: <strong id="quarter">1</strong>/4</span>
+  <span>Tempo: <strong id="timer">15</strong>s</span>
+</div>
+
+<p id="event"></p>
+
+<button id="simulateBtn" onclick="startGame()">SIMULAR JOGO 🏀</button>
+
+<div id="final-stats" class="hidden"></div>
+
+</section>
+</main>
+
+<footer>
+  Projeto criado por <strong>Kauã Kairon Alves de Melo</strong> – ADS © 2026
+</footer>
+
+<script>
+const teams = {
+  Lakers:{logo:'https://upload.wikimedia.org/wikipedia/commons/3/3c/Los_Angeles_Lakers_logo.svg',
+    players:[
+      {name:'LeBron James',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png'},
+      {name:'Anthony Davis',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/203076.png'},
+      {name:'Austin Reaves',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/1630559.png'}
+  ]},
+  Warriors:{logo:'https://upload.wikimedia.org/wikipedia/en/0/01/Golden_State_Warriors_logo.svg',
+    players:[
+      {name:'Stephen Curry',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png'},
+      {name:'Klay Thompson',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/202691.png'},
+      {name:'Draymond Green',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/203110.png'}
+  ]},
+  Bulls:{logo:'https://upload.wikimedia.org/wikipedia/en/6/67/Chicago_Bulls_logo.svg',
+    players:[
+      {name:'Zach LaVine',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/203897.png'},
+      {name:'Coby White',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/1629632.png'},
+      {name:'Nikola Vučević',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/202696.png'}
+  ]},
+  Celtics:{logo:'https://upload.wikimedia.org/wikipedia/en/8/8f/Boston_Celtics.svg',
+    players:[
+      {name:'Jayson Tatum',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/1628369.png'},
+      {name:'Jaylen Brown',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/1627759.png'},
+      {name:'Derrick White',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/1628401.png'}
+  ]},
+  Mavericks:{logo:'https://upload.wikimedia.org/wikipedia/en/9/97/Dallas_Mavericks_logo.svg',
+    players:[
+      {name:'Luka Dončić',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png'},
+      {name:'Kyrie Irving',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/202681.png'},
+      {name:'Dereck Lively II',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/1641733.png'}
+  ]},
+  Thunder:{logo:'https://upload.wikimedia.org/wikipedia/en/5/5d/Oklahoma_City_Thunder.svg',
+    players:[
+      {name:'Shai Gilgeous-Alexander',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/1628983.png'},
+      {name:'Jalen Williams',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/1631114.png'},
+      {name:'Chet Holmgren',photo:'https://cdn.nba.com/headshots/nba/latest/1040x760/1631096.png'}
+  ]}
+};
+
+let bracket = Object.keys(teams).sort(()=>Math.random()-0.5);
+let championshipStats = {};
+let teamA,teamB,scoreA,scoreB,quarter,time,statsA,statsB,interval;
+
+function chooseTeam(){
+  document.getElementById('select-screen').classList.add('hidden');
+  document.getElementById('game-screen').classList.remove('hidden');
+  nextMatch();
+}
+
+function nextMatch(){
+  document.getElementById('final-stats').classList.add('hidden');
+  document.getElementById('simulateBtn').style.display='inline-block';
+
+  if(bracket.length===1){
+    const mvp = calculateMVP();
+    document.getElementById('match-title').innerText=`🏆 CAMPEÃO: ${bracket[0]}`;
+    document.getElementById('final-stats').innerHTML=`
+      <h3>🏅 MVP DO CAMPEONATO</h3>
+      <img src="${mvp.photo}" class="mvp-photo">
+      <p><strong>${mvp.name}</strong></p>
+      <p>${mvp.pts} pts | ${mvp.reb} reb | ${mvp.ast} ast</p>
+    `;
+    document.getElementById('final-stats').classList.remove('hidden');
+    document.getElementById('simulateBtn').style.display='none';
+    return;
+  }
+
+  teamA=bracket.shift();
+  teamB=bracket.shift();
+  scoreA=scoreB=0;
+  quarter=1;
+  time=15;
+  statsA={}; statsB={};
+
+  teams[teamA].players.forEach(p=>statsA[p.name]={pts:0,reb:0,ast:0,photo:p.photo});
+  teams[teamB].players.forEach(p=>statsB[p.name]={pts:0,reb:0,ast:0,photo:p.photo});
+
+  document.getElementById('match-title').innerText=`${teamA} x ${teamB}`;
+  document.getElementById('logoA').src=teams[teamA].logo;
+  document.getElementById('logoB').src=teams[teamB].logo;
+  document.getElementById('teamA-name').innerText=teamA;
+  document.getElementById('teamB-name').innerText=teamB;
+  document.getElementById('quarter').innerText=quarter;
+  document.getElementById('timer').innerText=time;
+  updatePlacar();
+}
+
+function startGame(){
+  document.getElementById('simulateBtn').style.display='none';
+  interval=setInterval(simulateSecond,700);
+}
+
+function simulateSecond(){
+  time--;
+  document.getElementById('timer').innerText=time;
+  if(Math.random()<0.4) makeScore(teamA,statsA,'A');
+  if(Math.random()<0.4) makeScore(teamB,statsB,'B');
+  if(time<=0){
+    quarter++;
+    if(quarter>4){clearInterval(interval);endGame();}
+    else{time=15;document.getElementById('quarter').innerText=quarter;}
+  }
+}
+
+function makeScore(team,stats,side){
+  const p=Object.keys(stats)[Math.floor(Math.random()*3)];
+  const pts=[2,3][Math.floor(Math.random()*2)];
+  if(side==='A')scoreA+=pts; else scoreB+=pts;
+  stats[p].pts+=pts;
+  stats[p].reb+=Math.floor(Math.random()*2);
+  stats[p].ast+=Math.floor(Math.random()*2);
+  document.getElementById('event').innerText=`${p} fez ${pts} pts`;
+  setTimeout(()=>document.getElementById('event').innerText='',1500);
+  updatePlacar();
+}
+
+function endGame(){
+  let html=`<h3>📊 Estatísticas da Partida</h3><table>
+  <tr><th>Jogador</th><th>PTS</th><th>REB</th><th>AST</th></tr>`;
+
+  [statsA,statsB].forEach(s=>{
+    Object.keys(s).forEach(p=>{
+      html+=`<tr><td>${p}</td><td>${s[p].pts}</td><td>${s[p].reb}</td><td>${s[p].ast}</td></tr>`;
+      if(!championshipStats[p])championshipStats[p]={pts:0,reb:0,ast:0,photo:s[p].photo};
+      championshipStats[p].pts+=s[p].pts;
+      championshipStats[p].reb+=s[p].reb;
+      championshipStats[p].ast+=s[p].ast;
+    });
+  });
+
+  html+=`</table>
+  <button onclick="nextMatch()">PRÓXIMA PARTIDA ▶</button>`;
+
+  document.getElementById('final-stats').innerHTML=html;
+  document.getElementById('final-stats').classList.remove('hidden');
+
+  bracket.push(scoreA>=scoreB?teamA:teamB);
+}
+
+function calculateMVP(){
+  let best=null,max=0;
+  Object.keys(championshipStats).forEach(p=>{
+    const s=championshipStats[p];
+    const score=s.pts+(s.reb*1.2)+(s.ast*1.5);
+    if(score>max){max=score;best={name:p,...s};}
+  });
+  return best;
+}
+
+function updatePlacar(){
+  document.getElementById('placar').innerText=`${scoreA} x ${scoreB}`;
+}
+</script>
+
+</body>
+</html>
